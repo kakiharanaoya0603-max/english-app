@@ -1,6 +1,7 @@
 """⚙️ 設定画面：音声の方式・速度・アクセントと、データ・辞書の情報"""
 import streamlit as st
 
+import auth
 import dictionary
 import speech
 import storage
@@ -37,6 +38,9 @@ def render() -> None:
     if st.button("スプレッドシートから読み直す", help="ほかの端末で登録した内容をすぐ反映したいときに"):
         st.cache_data.clear()
         st.rerun()
+
+    st.subheader("🔒 ログイン")
+    st.button("ログアウト", on_click=auth.logout, help="この端末で覚えたパスワードも消します")
 
     st.subheader("📖 辞書")
     st.caption(dictionary.CREDIT)

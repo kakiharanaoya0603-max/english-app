@@ -4,6 +4,7 @@
 """
 import streamlit as st
 
+import auth
 import speech
 import storage
 from views import home, notebook, review, search, settings
@@ -16,8 +17,8 @@ st.markdown(
 /* 上のツールバー（Share・︙などのボタン、高さ約60px）とタブが重ならないよう上の余白を確保 */
 [data-testid="stMainBlockContainer"] { padding-top: 4.5rem; padding-bottom: 4rem; }
 
-/* 音声用の JavaScript を入れた入れ物は見せない */
-.st-key-speech_js { display: none; }
+/* 音声・ログイン用の JavaScript を入れた入れ物は見せない */
+.st-key-speech_js, .st-key-auth_js { display: none; }
 
 /* 検索結果や一覧のボタン（キーが results_ / list_ で始まる入れ物の中）は、読みやすいよう左寄せにする */
 [class*="st-key-results_"] button, [class*="st-key-list_"] button { justify-content: flex-start; text-align: left; }
@@ -81,6 +82,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+auth.require_login()  # パスワードが合うまで、ここから下は表示しない
 speech.install()
 speech.load_settings()
 
