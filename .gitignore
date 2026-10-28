@@ -1,0 +1,9 @@
+# 秘密の鍵（絶対に公開しない）
+.streamlit/secrets.toml
+*secrets*.toml
+*.json
+
+# パソコン内の仮データ
+data/
+
+__pycache__/

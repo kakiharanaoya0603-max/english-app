@@ -1,0 +1,6 @@
+streamlit>=1.66
+pandas
+gspread
+google-auth
+pykakasi
+gTTS
