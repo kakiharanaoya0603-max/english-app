@@ -14,6 +14,8 @@ import re
 
 import streamlit as st
 
+from textutil import clean_text, split_sentences  # noqa: F401（views/photo.py が ocr. から使う）
+
 ENGINES = {"browser": "📱 この端末で読む（Tesseract.js）", "server": "☁️ サーバーで読む（Tesseract）"}
 TESSERACT_JS = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"
 MAX_SIDE = 1800  # 読み取る前に、長い辺をこのピクセル数まで縮小する
@@ -48,44 +50,35 @@ def assemble(paragraphs: list[list[list[tuple[str, float]]]]) -> str:
     return "\n\n".join(out)
 
 
-# ---------- 文に区切る ----------
 
-# 後ろのピリオドで文が終わらない略語（小文字で比べる）
-_ABBREVIATIONS = {
-    "mr", "mrs", "ms", "dr", "prof", "sr", "jr", "st", "mt", "no", "vs", "etc", "inc", "ltd", "co", "corp",
-    "dept", "approx", "est", "fig", "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "sept", "oct",
-    "nov", "dec", "a.m", "p.m", "e.g", "i.e", "u.s", "u.k",
-}
+# ---------- 読み取り結果を文字にする ----------
+
+MIN_CONFIDENCE = 50  # これより自信の低い語は、写真のふち・影・模様を文字と見間違えたものとみなして除く
 
 
-def clean_text(text: str) -> str:
-    """読み取った文字を整える（行末のハイフンでの単語の分割をつなぐ・記号のゆれを直す）"""
-    text = text.replace("\r\n", "\n").replace("­", "")
-    text = re.sub(r"[‘’]", "'", re.sub(r"[“”]", '"', text))
-    text = re.sub(r"(\w)-\n(\w)", r"\1\2", text)  # 行末のハイフンで分かれた単語をつなぐ
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r" *\n *", "\n", text)
-    return re.sub(r"\n{3,}", "\n\n", text).strip()
+def _keep_word(text: str, confidence: float) -> bool:
+    if confidence >= MIN_CONFIDENCE:
+        return True
+    # 少しぼやけただけの普通の単語（小文字3文字以上）は残す
+    return confidence >= 30 and re.fullmatch(r"[a-z]{3,}[.,;:!?]?", text) is not None
 
 
-def split_sentences(text: str) -> list[str]:
-    """英文を文ごとに区切る。空行は段落の区切り、1つの改行は文の途中の改行とみなしてつなぐ"""
-    sentences = []
-    for paragraph in re.split(r"\n\s*\n", clean_text(text)):
-        paragraph = re.sub(r"\s*\n\s*", " ", paragraph).strip()
-        start = 0
-        # 「. ! ?」（後ろに閉じかっこ・引用符があってもよい）＋空白＋大文字・数字・引用符・かっこ のところで区切る
-        for m in re.finditer(r"[.!?]+[\"')\]]*\s+(?=[\"'(\[]?[A-Z0-9])", paragraph):
-            last_word = re.search(r"([A-Za-z.]+)[.!?]+[\"')\]]*\s+$", paragraph[start : m.end()])
-            if last_word and last_word.group(1).lower().strip(".") in _ABBREVIATIONS:
+def assemble(paragraphs: list[list[list[tuple[str, float]]]]) -> str:
+    """段落 → 行 → (語, 自信度0〜100) の読み取り結果から、見間違いらしい語・行を除いて文字にする"""
+    out = []
+    for paragraph in paragraphs:
+        lines = []
+        for line in paragraph:
+            words = [(t.strip(), c) for t, c in line if t.strip()]
+            kept = [t for t, c in words if _keep_word(t, c)]
+            mean = sum(c for _, c in words) / len(words) if words else 0
+            # 残った英字が2文字以下の行、全体に自信の低い行はごみとみなす
+            if len(re.findall(r"[A-Za-z]", "".join(kept))) <= 2 or mean < MIN_CONFIDENCE:
                 continue
-            if last_word and re.fullmatch(r"[A-Z]", last_word.group(1)):  # 「J. Smith」のような名前の頭文字
-                continue
-            sentences.append(paragraph[start : m.end()].strip())
-            start = m.end()
-        sentences.append(paragraph[start:].strip())
-    # 英字が2文字未満のもの（ページ番号・記号だけの行など）は除く
-    return [s for s in sentences if len(re.findall(r"[A-Za-z]", s)) >= 2]
+            lines.append(" ".join(kept))
+        if lines:
+            out.append("\n".join(lines))
+    return "\n\n".join(out)
 
 
 # ---------- サーバーで読む ----------

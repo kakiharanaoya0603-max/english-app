@@ -41,14 +41,23 @@ st.markdown(
 .rv-q { font-size: 1.25rem; font-weight: 600; line-height: 1.45; margin-top: 4px; }
 
 /* 🔊 再生ボタン（speech.py が作るHTMLのボタン） */
-.spk { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.spk-row, .spk-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.spk-ctl { margin-top: 8px; }
+.spk-ctl[hidden] { display: none; }
 .spk-btn {
     min-height: 44px; padding: 0 18px; border-radius: 22px; font-size: 1rem; cursor: pointer;
     border: 1px solid rgba(128,128,128,.45); background: transparent; color: inherit;
     -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 .spk-btn:active { background: rgba(255,75,75,.18); }
-.spk-msg { font-size: .8rem; color: #d33; flex-basis: 100%; }
+.spk-btn.spk-on { border-color: #ff4b4b; background: rgba(255,75,75,.12); font-weight: 600; }
+.spk-pause, .spk-stop {
+    flex: 1; min-height: 44px; border-radius: 8px; font-size: 1rem; cursor: pointer; color: inherit;
+    border: 1px solid rgba(128,128,128,.45); background: transparent; touch-action: manipulation;
+}
+.spk-status { font-size: .85rem; margin-top: 6px; opacity: .85; }
+.spk-status:empty { display: none; }
+.spk-msg { font-size: .8rem; color: #d33; margin-top: 4px; }
 .spk-msg:empty { display: none; }
 .voice-box { font-size: .9rem; }
 .voice-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
@@ -83,8 +92,8 @@ st.markdown(
 )
 
 auth.require_login()  # パスワードが合うまで、ここから下は表示しない
-speech.install()
 speech.load_settings()
+speech.install()  # 保存してある速度などを使うので load_settings() のあと
 
 if not storage.use_gsheets():
     st.info("いまはパソコン内のファイル（data フォルダ）に保存しています。")

@@ -11,6 +11,7 @@ import io
 import pandas as pd
 import streamlit as st
 
+import speech
 import storage
 from common import today_jst
 from textutil import normalize_en
@@ -54,12 +55,16 @@ def _delete(expr_id: str, english: str) -> None:
 # ---------- 一括登録 ----------
 
 def guess_source(text: str) -> str:
-    """出典の書き方の違いを吸収する（例：D2000 → Distinction 2000、公式問題集 → TOEIC公式）"""
+    """出典の書き方の違いを吸収する（例：D2000 → Distinction 2000、DS → Distinction S、公式問題集 → TOEIC公式）"""
     t = text.strip().lower()
     if not t:
         return ""
     if "2000" in t:
         return "Distinction 2000"
+    if t in ("distinction s", "distinctions", "ds", "d s") or t.startswith("distinction s"):
+        return "Distinction S"
+    if "がっちゃん" in t or "ガッチャン" in t or "gacchan" in t or "gatchan" in t:
+        return "がっちゃん英語"
     if "distinction" in t or t in ("d1", "distinction1"):
         return "Distinction 1"
     if "公式" in t or "toeic" in t:
@@ -166,6 +171,8 @@ def _list(expressions: pd.DataFrame) -> None:
             expression.editor(f"nb_edit_{selected}", expressions, initial=e.to_dict(), expr_id=selected, on_saved=_back)
             return
         expression.detail(e)
+        with st.expander("🎚 速度・くり返し（シャドーイング）"):
+            speech.controls("nb")
         col1, col2 = st.columns(2)
         col1.button("✏️ 編集", width="stretch", on_click=lambda: st.session_state.update(nb_editing=True))
         with col2.popover("🗑️ 削除", width="stretch"):

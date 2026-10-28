@@ -23,7 +23,7 @@ TABLES = {
 }
 # 表現のうち、登録・編集画面で入力する項目
 INPUT_COLUMNS = ["英語", "日本語訳", "例文", "例文訳", "品詞", "出典", "メモ", "タグ"]
-SOURCES = ["Distinction 2000", "Distinction 1", "TOEIC公式", "記事", "その他"]
+SOURCES = ["Distinction 2000", "Distinction 1", "Distinction S", "がっちゃん英語", "TOEIC公式", "記事", "その他"]
 PARTS_OF_SPEECH = ["", "名詞", "動詞", "形容詞", "副詞", "句動詞", "熟語・フレーズ", "前置詞", "接続詞", "その他"]
 TAG_SEP = "／"
 LOCAL_DIR = Path(__file__).parent / "data"

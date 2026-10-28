@@ -168,5 +168,5 @@ def render() -> None:
             for col, grade, kind in zip(cols, srs.GRADES, ["primary", "secondary", "secondary"]):
                 col.button(grade, key=f"rv_{grade}", type=kind, width="stretch", on_click=_grade, args=(e, grade, direction))
 
-    with st.expander("🔊 音声の速さ・アクセント"):
+    with st.expander("🔊 音声の速さ・くり返し"):
         speech.controls("rv")
