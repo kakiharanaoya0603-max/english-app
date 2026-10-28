@@ -5,6 +5,7 @@ import auth
 import dictionary
 import speech
 import storage
+from common import APP_VERSION
 
 PAGE_LABEL = "⚙️ 設定"
 TEST_WORD = "procurement"
@@ -41,6 +42,8 @@ def render() -> None:
 
     st.subheader("🔒 ログイン")
     st.button("ログアウト", on_click=auth.logout, help="この端末で覚えたパスワードも消します")
+
+    st.caption(f"バージョン {APP_VERSION}")
 
     st.subheader("📖 辞書")
     st.caption(dictionary.CREDIT)

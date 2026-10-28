@@ -4,6 +4,9 @@ from zoneinfo import ZoneInfo
 
 import streamlit as st
 
+# 公開中のアプリが最新かどうかを画面で確かめるための印（更新したら書き換える）
+APP_VERSION = "2026-10-29c（音声の一時停止・出典追加・ログイン保持）"
+
 
 def now_jst() -> dt.datetime:
     # 公開先のサーバーは日本時間ではないので、日本時間を明示的に求める
