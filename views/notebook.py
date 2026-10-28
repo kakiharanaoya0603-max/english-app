@@ -1,7 +1,7 @@
 """📒 表現帳画面：登録・一括登録・一覧（編集・削除）
 
-  st.session_state["notebook_mode"] … 「＋ 登録」「一括登録」「一覧」
-  st.session_state["prefill"]       … 検索画面から渡された登録の初期値
+  st.session_state["notebook_mode"] … 「＋ 登録」「📷 写真」「一括登録」「一覧」
+  st.session_state["prefill"]       … 検索画面・写真モードから渡された登録の初期値
   st.session_state["nb_selected"]   … 一覧で選んだ表現のID
   st.session_state["nb_editing"]    … 選んだ表現を編集中かどうか
 """
@@ -14,10 +14,10 @@ import streamlit as st
 import storage
 from common import today_jst
 from textutil import normalize_en
-from views import expression
+from views import expression, photo
 
 PAGE_LABEL = "📒 表現帳"
-MODES = ["＋ 登録", "一括登録", "一覧"]
+MODES = ["＋ 登録", "📷 写真", "一括登録", "一覧"]
 SORTS = {"新しい順": ("登録日", False), "古い順": ("登録日", True), "復習日が近い順": ("次回復習日", True), "ABC順": ("英語", True)}
 
 # 一括登録の見出しとして受け付ける名前
@@ -199,9 +199,13 @@ def render() -> None:
     )
     if mode == "＋ 登録":
         prefill = st.session_state.get("prefill")
-        if prefill:
+        if prefill and prefill.get("例文") and not prefill.get("英語"):
+            st.caption("写真の文を例文に入れました。覚えたい表現（英語）と日本語訳を入れて登録してください。")
+        elif prefill:
             st.caption("検索した内容を入れました。例文やメモを足して登録してください。")
         expression.editor("nb_add", expressions, initial=prefill)
+    elif mode == "📷 写真":
+        photo.render()
     elif mode == "一括登録":
         _bulk(expressions)
     else:

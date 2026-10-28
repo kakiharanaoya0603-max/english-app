@@ -11,6 +11,11 @@ python -m streamlit run app.py
 
 `.streamlit/secrets.toml`（GitHubには入れない）があればスプレッドシートに、なければ `data/` フォルダに保存します。
 
+## 写真から英文を読み取る（📒 表現帳 → 📷 写真）
+
+文字の読み取り（OCR）は無料の Tesseract を使います（APIキー不要）。初期設定はブラウザの中で動く Tesseract.js で、パソコンでも `streamlit run` するだけで試せます。
+「サーバーで読む」方式をパソコンで試すときは Tesseract 本体のインストールが必要です（Streamlit Cloud では `packages.txt` で自動で入ります）。
+
 ## 辞書データ
 
 `ejdict.tsv.gz` は [EJDict-hand](https://github.com/kujirahand/EJDict)（kujirahand さん作成、パブリックドメイン／CC0）から
